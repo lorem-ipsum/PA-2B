@@ -59,14 +59,11 @@ struct BST {
       // 插入非空树
       std::pair<BNP, BNP> res = search(v);
       assert(res.first != nullptr && res.second == nullptr);
-      // printf("search(%d) = %d\n", v, res.first->value_);
       BNP tmp = new BinNode(v, res.first);
       if (v > res.first->value_) {
         res.first->rightChild = tmp;
-        // printf("%d \\ %d\n", res.first->value_, tmp->value_);
       } else {
         res.first->leftChild = tmp;
-        // printf("%d / %d\n", res.first->value_, tmp->value_);
       }
     }
     ++size;
