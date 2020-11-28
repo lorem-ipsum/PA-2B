@@ -7,9 +7,6 @@
 
 struct BinNode {
   int value_;
-  int balance_;
-  int height_;
-  int size_;
   BNP parent;
   BNP leftChild;
   BNP rightChild;
@@ -18,9 +15,6 @@ struct BinNode {
       : value_(v), parent(nullptr), leftChild(nullptr), rightChild(nullptr) {}
   BinNode(int v, BNP p)
       : value_(v), parent(p), leftChild(nullptr), rightChild(nullptr) {}
-
-  int getHeight() { return height_; }
-  int getSize() { return size_; }
 };
 
 struct BST {
@@ -50,17 +44,11 @@ struct BST {
     BNP splayFrom = nullptr;
     // 插入空树中
     if (size == 0) {
-      /// assert(root == nullptr);
       root = newNode;
-
-      root->height_ = 0;
-      root->size_ = 0;
-      root->balance_ = 0;
     }
     // 插入非空树
     else {
       std::pair<BNP, BNP> res = search(v);
-      /// assert(res.first != nullptr && res.second == nullptr);
       BNP tmp = new BinNode(v, res.first);
       splayFrom = tmp;
       if (v > res.first->value_) {
@@ -102,11 +90,7 @@ struct BST {
     // printf("remove(%d)\n", x);
     std::pair<BNP, BNP> res = search(x);
     BNP cur = res.second;
-    // if (cur == nullptr) exit(250);
-    // splay(res.second);
-    // cur = root;
     BNP par = cur->parent;
-    assert(cur != nullptr && cur->value_ == x);
     if (cur->leftChild == nullptr && cur->rightChild == nullptr) {
       // remove a node which has no children
       if (par == nullptr) {
@@ -116,7 +100,6 @@ struct BST {
         if (par->leftChild == cur) {
           par->leftChild = nullptr;
         } else {
-          assert(par->rightChild == cur);
           par->rightChild = nullptr;
         }
       }
@@ -191,7 +174,6 @@ struct BST {
         BNP succ = successor(cur);
         BNP succParent = succ->parent;
         BNP succRightChild = succ->rightChild;
-        assert(succ->leftChild == nullptr);
         succ->parent = par;
         if (par == nullptr) {
           // cur is the root node
@@ -212,7 +194,6 @@ struct BST {
           succParent->leftChild = succRightChild;
           if (succRightChild) succRightChild->parent = succParent;
         } else {
-          assert(cur->rightChild == succ);
           succ->leftChild = cur->leftChild;
           if (cur->leftChild) cur->leftChild->parent = succ;
         }
@@ -372,7 +353,7 @@ struct BST {
             gg->rightChild = x;
           }
         } else {
-          // assert(false);
+          assert(false);
         }
       }
     }
