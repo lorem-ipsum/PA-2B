@@ -74,7 +74,13 @@ struct BST {
   }
   BNP predecessor(BNP r) {
     if (r->leftChild == nullptr) {
-      return r->parent;
+      // a million bugs exist here
+      if (r->parent == nullptr)
+        return nullptr;
+      else if (r->parent->rightChild == r)
+        return r->parent;
+      else
+        return nullptr;
     }
     BNP res = r->leftChild;  // res != nullptr
     while (res->rightChild) {
@@ -84,7 +90,7 @@ struct BST {
   }
   BNP successor(BNP r) {
     if (r->rightChild == nullptr) {
-      return r->parent;
+      assert(false);
     }
     BNP res = r->rightChild;  // res != nullptr
     while (res->leftChild) {
@@ -197,13 +203,19 @@ struct BST {
             par->rightChild = succ;
           }
         }
-        succ->leftChild = cur->leftChild;
-        if (cur->leftChild) cur->leftChild->parent = succ;
-        succ->rightChild = cur->rightChild;
-        if (cur->rightChild) cur->rightChild->parent = succ;
+        if (succParent != cur) {
+          succ->leftChild = cur->leftChild;
+          if (cur->leftChild) cur->leftChild->parent = succ;
+          succ->rightChild = cur->rightChild;
+          if (cur->rightChild) cur->rightChild->parent = succ;
 
-        succParent->leftChild = succRightChild;
-        if (succRightChild) succRightChild->parent = succParent;
+          succParent->leftChild = succRightChild;
+          if (succRightChild) succRightChild->parent = succParent;
+        } else {
+          assert(cur->rightChild == succ);
+          succ->leftChild = cur->leftChild;
+          if (cur->leftChild) cur->leftChild->parent = succ;
+        }
       }
     }
     delete cur;
@@ -228,12 +240,12 @@ struct BST {
     if (size == 0) return -1;
     BNP r = root;
     int hot = -1;
-    BNP splayFromHot = r;
-    BNP splayFrom = r;
+    // BNP splayFromHot = r;
+    // BNP splayFrom = r;
     while (r) {
       if (r->value_ > x) {
         if (!r->leftChild) {
-          splay(splayFromHot);
+          splay(r);
           return hot;
         } else {
           r = r->leftChild;
@@ -244,9 +256,9 @@ struct BST {
       } else {
         // r->value_ < x
         hot = r->value_;
-        splayFromHot = r;
+        // splayFromHot = r;
         if (!r->rightChild) {
-          splay(splayFromHot);
+          splay(r);
           return hot;
         } else {
           r = r->rightChild;
@@ -256,13 +268,10 @@ struct BST {
   }
 
   void splay(BNP x) {
-    // x is root itself
     if (!x) exit(40);
-    while (true) {
-      if (x == root) return;
-
+    while (x != root) {
       // x is the child of root
-      else if (x->parent == root) {
+      if (x->parent == root) {
         if (x == root->leftChild) {
           BNP p2 = x->rightChild;
           root->leftChild = p2;
