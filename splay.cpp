@@ -31,7 +31,7 @@ struct BST {
     if (size == 0) {
       return std::pair<BNP, BNP>(nullptr, nullptr);
     }
-    BNP hot = root;
+    BNP hot = nullptr;
     BNP res = root;
     while (true) {
       if (res == nullptr || v == res->value_) break;
@@ -50,7 +50,7 @@ struct BST {
     BNP splayFrom = nullptr;
     // 插入空树中
     if (size == 0) {
-      assert(root == nullptr);
+      /// assert(root == nullptr);
       root = newNode;
 
       root->height_ = 0;
@@ -60,7 +60,7 @@ struct BST {
     // 插入非空树
     else {
       std::pair<BNP, BNP> res = search(v);
-      assert(res.first != nullptr && res.second == nullptr);
+      /// assert(res.first != nullptr && res.second == nullptr);
       BNP tmp = new BinNode(v, res.first);
       splayFrom = tmp;
       if (v > res.first->value_) {
@@ -96,6 +96,9 @@ struct BST {
     // printf("remove(%d)\n", x);
     std::pair<BNP, BNP> res = search(x);
     BNP cur = res.second;
+    // if (cur == nullptr) exit(250);
+    // splay(res.second);
+    // cur = root;
     BNP par = cur->parent;
     assert(cur != nullptr && cur->value_ == x);
     if (cur->leftChild == nullptr && cur->rightChild == nullptr) {
@@ -205,6 +208,8 @@ struct BST {
     }
     delete cur;
     --size;
+
+    if (par) splay(par);
   }
 
   void traverse() {
@@ -251,120 +256,121 @@ struct BST {
   }
 
   void splay(BNP x) {
-    assert(x != nullptr);
     // x is root itself
-    if (x == root) return;
+    if (!x) exit(40);
+    while (true) {
+      if (x == root) return;
 
-    // x is the child of root
-    else if (x->parent == root) {
-      if (x == root->leftChild) {
-        BNP p2 = x->rightChild;
-        root->leftChild = p2;
-        x->rightChild = root;
-        root->parent = x;
-        x->parent = nullptr;
-        if (p2) p2->parent = root;
-        root = x;
-      } else {
-        BNP p2 = x->leftChild;
-        root->rightChild = p2;
-        x->leftChild = root;
-        root->parent = x;
-        x->parent = nullptr;
-        if (p2) p2->parent = root;
-        root = x;
+      // x is the child of root
+      else if (x->parent == root) {
+        if (x == root->leftChild) {
+          BNP p2 = x->rightChild;
+          root->leftChild = p2;
+          x->rightChild = root;
+          root->parent = x;
+          x->parent = nullptr;
+          if (p2) p2->parent = root;
+          root = x;
+        } else {
+          BNP p2 = x->leftChild;
+          root->rightChild = p2;
+          x->leftChild = root;
+          root->parent = x;
+          x->parent = nullptr;
+          if (p2) p2->parent = root;
+          root = x;
+        }
       }
-    }
-    // x is or is younger than the grandchild of root
-    else {
-      BNP p = x->parent;
-      BNP g = p->parent;
-      BNP gg = g->parent;
-      if (x == p->leftChild && p == g->rightChild) {
-        BNP p2 = x->leftChild;
-        BNP p3 = x->rightChild;
-        x->leftChild = g;
-        x->rightChild = p;
-        g->rightChild = p2;
-        p->leftChild = p3;
-        g->parent = x;
-        p->parent = x;
-        if (p2) p2->parent = g;
-        if (p3) p3->parent = p;
-        x->parent = gg;
-        if (gg == nullptr) {
-          root = x;
-        } else if (g == gg->leftChild) {
-          gg->leftChild = x;
+      // x is or is younger than the grandchild of root
+      else {
+        BNP p = x->parent;
+        BNP g = p->parent;
+        BNP gg = g->parent;
+        if (x == p->leftChild && p == g->rightChild) {
+          BNP p2 = x->leftChild;
+          BNP p3 = x->rightChild;
+          x->leftChild = g;
+          x->rightChild = p;
+          g->rightChild = p2;
+          p->leftChild = p3;
+          g->parent = x;
+          p->parent = x;
+          if (p2) p2->parent = g;
+          if (p3) p3->parent = p;
+          x->parent = gg;
+          if (gg == nullptr) {
+            root = x;
+          } else if (g == gg->leftChild) {
+            gg->leftChild = x;
+          } else {
+            gg->rightChild = x;
+          }
+        } else if (x == p->rightChild && p == g->leftChild) {
+          BNP p2 = x->leftChild;
+          BNP p3 = x->rightChild;
+          x->leftChild = p;
+          x->rightChild = g;
+          p->rightChild = p2;
+          g->leftChild = p3;
+          p->parent = x;
+          g->parent = x;
+          if (p2) p2->parent = p;
+          if (p3) p3->parent = g;
+          x->parent = gg;
+          if (gg == nullptr) {
+            root = x;
+          } else if (g == gg->leftChild) {
+            gg->leftChild = x;
+          } else {
+            gg->rightChild = x;
+          }
+        } else if (x == p->leftChild && p == g->leftChild) {
+          BNP p2 = x->rightChild;
+          BNP p3 = p->rightChild;
+          x->rightChild = p;
+          p->rightChild = g;
+          p->leftChild = p2;
+          g->leftChild = p3;
+          p->parent = x;
+          g->parent = p;
+          if (p2) p2->parent = p;
+          if (p3) p3->parent = g;
+          x->parent = gg;
+          if (gg == nullptr) {
+            root = x;
+          } else if (g == gg->leftChild) {
+            gg->leftChild = x;
+          } else {
+            gg->rightChild = x;
+          }
+        } else if (x == p->rightChild && p == g->rightChild) {
+          BNP p2 = p->leftChild;
+          BNP p3 = x->leftChild;
+          x->leftChild = p;
+          p->leftChild = g;
+          g->rightChild = p2;
+          p->rightChild = p3;
+          p->parent = x;
+          g->parent = p;
+          if (p2) p2->parent = g;
+          if (p3) p3->parent = p;
+          x->parent = gg;
+          if (gg == nullptr) {
+            root = x;
+          } else if (g == gg->leftChild) {
+            gg->leftChild = x;
+          } else {
+            gg->rightChild = x;
+          }
         } else {
-          gg->rightChild = x;
+          // assert(false);
         }
-      } else if (x == p->rightChild && p == g->leftChild) {
-        BNP p2 = x->leftChild;
-        BNP p3 = x->rightChild;
-        x->leftChild = p;
-        x->rightChild = g;
-        p->rightChild = p2;
-        g->leftChild = p3;
-        p->parent = x;
-        g->parent = x;
-        if (p2) p2->parent = p;
-        if (p3) p3->parent = g;
-        x->parent = gg;
-        if (gg == nullptr) {
-          root = x;
-        } else if (g == gg->leftChild) {
-          gg->leftChild = x;
-        } else {
-          gg->rightChild = x;
-        }
-      } else if (x == p->leftChild && p == g->leftChild) {
-        BNP p2 = x->rightChild;
-        BNP p3 = p->rightChild;
-        x->rightChild = p;
-        p->rightChild = g;
-        p->leftChild = p2;
-        g->leftChild = p3;
-        p->parent = x;
-        g->parent = p;
-        if (p2) p2->parent = p;
-        if (p3) p3->parent = g;
-        x->parent = gg;
-        if (gg == nullptr) {
-          root = x;
-        } else if (g == gg->leftChild) {
-          gg->leftChild = x;
-        } else {
-          gg->rightChild = x;
-        }
-      } else if (x == p->rightChild && p == g->rightChild) {
-        BNP p2 = p->leftChild;
-        BNP p3 = x->leftChild;
-        x->leftChild = p;
-        p->leftChild = g;
-        g->rightChild = p2;
-        p->rightChild = p3;
-        p->parent = x;
-        g->parent = p;
-        if (p2) p2->parent = g;
-        if (p3) p3->parent = p;
-        x->parent = gg;
-        if (gg == nullptr) {
-          root = x;
-        } else if (g == gg->leftChild) {
-          gg->leftChild = x;
-        } else {
-          gg->rightChild = x;
-        }
-      } else {
-        assert(false);
       }
-      splay(x);
     }
   }
 };
 
-#define DEBUG
+// #define DEBUG
 
 int main() {
   BST bst;
@@ -385,17 +391,20 @@ int main() {
     }
   }
 #else
-  for (int i = 0; i < 100000; ++i) {
-    bst.insert(i);
-    // bst.traverse();
+  for (int i = 0; i < 1000; ++i) {
+    bst.insert(i * 233 % 19260817);
+    bst.traverse();
   }
-  for (int i = 50000; i < 60000; ++i) {
-    printf("%d ", bst.findEqualToOrLessThan(i));
+  for (int i = 500; i < 510; ++i) {
+    printf("%d ", bst.findEqualToOrLessThan(i * 233 % 19260817));
   }
   printf("\n");
-  for (int i = 99999; i >= 10; --i) {
-    bst.remove(i);
-    // bst.traverse();
+  for (int i = 999; i >= 10; --i) {
+    bst.remove(i * 233 % 19260817);
+    bst.traverse();
+  }
+  for (int i = 500; i < 510; ++i) {
+    printf("%d ", bst.findEqualToOrLessThan(i * 233 % 19260817));
   }
   bst.traverse();
 #endif
